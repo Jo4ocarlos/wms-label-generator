@@ -1,0 +1,92 @@
+/* Container Principal (Simula a Etiqueta Térmica 100x40 na tela) */
+.etiqueta_simples {
+    width: 100mm;
+    height: 40mm; /* Metade da altura da etiqueta de envio normal */
+    background: white;
+    padding: 4mm 5mm;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* Visualização na tela do PC */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #000;
+}
+
+/* Header da Etiqueta */
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.logo_marca {
+    max-height: 25px;
+    max-width: 50mm; /* Evita que logos muito compridos quebrem o layout */
+    object-fit: contain;
+}
+
+.quantidade_box {
+    margin: 0;
+    font-size: 14pt;
+}
+
+.quantidade_numero {
+    font-size: 20pt;
+    font-weight: 900;
+}
+
+/* Área Central (O Produto) */
+.centro {
+    text-align: center;
+    flex-grow: 1; /* Estica para empurrar o topo e o rodapé para as extremidades */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nome_produto {
+    font-size: 15pt;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.1;
+}
+
+/* Rodapé */
+.rodape {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.logo_empresa {
+    max-height: 15px;
+    object-fit: contain;
+}
+
+/* =========================================
+   COMPORTAMENTO DE IMPRESSÃO (ETIQUETA SIMPLES)
+   ========================================= */
+@media print {
+
+    .etiqueta_simples {
+        /* Limpeza de interface */
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 2mm 3mm !important;
+        
+        /* Forçando as medidas da etiqueta térmica pequena */
+        width: 100mm !important;
+        height: 40mm !important;
+        
+        /* Quebra de página estrita para cada produto sair em uma etiqueta individual */
+        page-break-after: always !important;
+        break-after: page !important;
+        
+        /* Bloqueio de vazamento */
+        overflow: hidden !important;
+    }
+}

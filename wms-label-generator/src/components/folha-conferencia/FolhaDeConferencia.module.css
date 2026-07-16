@@ -1,0 +1,143 @@
+/* Container Principal (Simula a Folha A4 na tela) */
+.container_conferencia {
+    display: flex;
+    flex-direction: column; 
+    justify-content: flex-start; 
+    width: 210mm; /* Largura exata de uma folha A4 */
+    background: white;
+    padding: 10mm; 
+    box-sizing: border-box; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border: 1px solid #ccc;
+    font-size: 11pt;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin-bottom: 20px;
+}
+
+/* Header */
+.header {
+    height: 15mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 5px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20pt;
+}
+
+.logo_marca {
+    max-height: 50px;
+    max-width: 80mm;
+    object-fit: contain;
+}
+
+/* Conteúdo */
+.conteudo {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Empurra o footer pro final da folha */
+}
+
+.conteudo h2 {
+    font-size: 16pt;
+    font-weight: 900;
+    margin: 0 0 5mm 0;
+    text-transform: uppercase;
+}
+
+.box_materiais {
+    border: 2px solid #000;
+    border-radius: 5px;
+    padding: 5mm;
+    margin-top: 5px;
+    flex-grow: 1; /* Faz a caixa esticar para ocupar o espaço vazio */
+}
+
+.box_materiais h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-decoration: underline;
+}
+
+.item_conferencia {
+    display: flex;
+    align-items: center;
+    gap:5px;
+    font-size: 12pt;
+     margin: 12px 0;
+}
+
+.check_box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #000;
+    margin-right: 5px;
+    border-radius: 3px;
+}
+
+.observacao {
+    margin-top: 25px;
+    font-size: 11pt;
+    border-top: 1px dashed #ccc;
+    padding-top: 10px;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10mm;
+    border-top: 2px solid #000;
+    padding-top: 10mm;
+}
+
+.assinatura_box p {
+    margin: 0;
+    font-size: 12pt;
+    font-weight: bold;
+    line-height: 1.8;
+}
+
+.assinatura_box span {
+    font-weight: normal;
+}
+
+.texto_menor {
+    margin: 0 0 20px 125px;
+    font-size: 9pt;
+    color: #555;
+    font-weight: normal;
+}
+
+.logo_box {
+    display: flex;
+    align-items: flex-end;
+}
+
+.logo_empresa {
+    max-height: 50px;
+    max-width: 35mm;
+    object-fit: contain;
+}
+
+/* =========================================
+   COMPORTAMENTO DE IMPRESSÃO (A MÁGICA)
+   ========================================= */
+@media print {
+    .container_conferencia {
+        width: 100%; 
+        min-height: 100%; 
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0; /* A margem é definida pelo @page do index.css */
+        page-break-after: always;
+    }
+}

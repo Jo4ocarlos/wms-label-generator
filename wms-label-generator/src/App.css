@@ -1,0 +1,202 @@
+/* ========================================================
+   RESET BÁSICO E VARIÁVEIS GLOBAIS
+======================================================== */
+:root {
+  --bg-color: #f3f4f6;
+  --sidebar-bg: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --primary-color: #5e17eb;
+  --primary-hover: #4816aa;
+  --border-color: #e5e7eb;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif; 
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+/* ========================================================
+   LAYOUT PRINCIPAL E ÁREA DE IMPRESSÃO
+======================================================== */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.print-area {
+  flex-grow: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  overflow-y: auto;
+}
+/* ========================================================
+   BARRA DE STATUS (Painel Flutuante à Direita)
+======================================================== */
+.status-bar {
+  position: fixed; 
+  top: 5px;
+  right: 24px;
+  background-color: #ffffff; 
+  border-radius: var(--radius); 
+  padding: 16px;
+  box-shadow: var(--shadow-md); 
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  width: 350px;
+  gap: 16px; 
+}
+
+/* Container dos Cards */
+.status-cards {
+  display: flex;
+  gap: 12px; 
+  width: 100%;
+}
+
+/* Estilo individual de cada Card */
+.card-sucesso, .card-alerta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  min-width: 130px;
+  flex: 1; 
+}
+
+.card-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-value {
+  font-size: 24px;
+  color: var(--text-main);
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Estado de Alerta Ativo (Amarelo) */
+.card-alerta.ativo {
+  background-color: #fef08a; 
+  border-color: #eab308;
+  cursor: help;
+  position: relative; 
+}
+.card-alerta.ativo .card-value {
+  color: #a16207;
+}
+
+/* ========================================================
+   CHECKBOX FORÇAR IMPRESSÃO
+======================================================== */
+.checkbox-forcar {
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color); /* Uma linha sutil separando os cards do checkbox */
+}
+
+.checkbox-forcar label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-forcar input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+/* ========================================================
+   TOOLTIP DE INCONSISTÊNCIAS
+======================================================== */
+.tooltip-inconsistencias {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px; /* Dá um espacinho do card */
+  background-color: var(--text-main);
+  color: white;
+  padding: 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  width: 250px; /* Largura fixa para a tooltip */
+}
+
+.card-alerta.ativo:hover .tooltip-inconsistencias {
+  display: block;
+}
+
+.tooltip-inconsistencias h4 {
+  font-size: 13px;
+  color: #fef08a;
+  margin-bottom: 8px;
+}
+
+.tooltip-inconsistencias ul {
+  list-style: none;
+  max-height: 150px;
+  overflow-y: auto;
+  text-align: left; /* Garante que a lista fique alinhada à esquerda */
+}
+
+.tooltip-inconsistencias li {
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+/* ========================================================
+   REGRAS DE IMPRESSÃO
+======================================================== */
+@media print {
+  .app-layout {
+    display: block;
+    min-height: auto;
+  }
+
+  .print-area {
+    padding: 0;
+    gap: 0;
+    display: block;
+  }
+
+  body {
+    background-color: #fff;
+  }
+  .status-bar{
+    display: none;
+  }
+}

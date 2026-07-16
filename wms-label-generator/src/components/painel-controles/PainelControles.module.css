@@ -1,0 +1,135 @@
+/* ========================================================
+   ESTILOS ESPECÍFICOS DO PAINEL DE CONTROLES
+======================================================== */
+.sidebarControles {
+  width: 320px;
+  min-width: 320px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* Esconde o painel na hora da impressão */
+@media print {
+  .sidebarControles {
+    display: none !important;
+  }
+}
+.logoApp {
+  max-width: 160px; 
+  max-height: 45px; 
+  object-fit: contain; 
+  display: block; 
+}
+.sidebarHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebarHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.sidebarHeader p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.sidebarForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.modernInput,
+.modernSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  background-color: #fff;
+  color: var(--text-main);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.modernInput:focus,
+.modernSelect:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.modernSelect:disabled {
+  background-color: #f9fafb;
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.sidebarActions {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btnPrimary,
+.btnSecondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btnPrimary {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btnPrimary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btnSecondary {
+  background-color: #ffffff;
+  color: var(--text-main);
+  border: 2px solid var(--border-color);
+}
+
+.btnSecondary:hover {
+  background-color: #f9f9fb;
+  border-color: #d1d5db;
+}

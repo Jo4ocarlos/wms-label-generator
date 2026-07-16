@@ -1,0 +1,176 @@
+/* Container Principal (A4 Estilo Retrato) */
+.declaracao_box {
+    width: 210mm;
+   
+    background: white;
+    padding: 10mm;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    color: #000;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Header */
+.dec_header {
+    display: flex;
+    border: 2px solid #000;
+    margin-bottom: 5px;
+}
+
+.dec_header_title {
+    flex-grow: 1;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16pt;
+    padding: 5px;
+    border-right: 2px solid #000;
+    text-transform: uppercase;
+}
+
+.dec_header_id {
+    width: 35mm;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14pt;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Blocos Remetente / Destinatário */
+.dec_rem_dest {
+    display: flex;
+    border: 2px solid #000;
+    margin-bottom: 5px;
+}
+
+.dec_col {
+    width: 50%;
+    padding: 5px 8px;
+    box-sizing: border-box;
+}
+
+.dec_col.left {
+    border-right: 2px solid #000;
+}
+
+.dec_col_title {
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    margin-bottom: 5px;
+    padding-bottom: 2px;
+    letter-spacing: 2px;
+}
+
+.linha_dupla {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dec_field {
+    font-size: 9pt;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.dec_field strong {
+    font-size: 8.5pt;
+}
+
+/* Tabela de Itens */
+.dec_table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000;
+    margin-bottom: 5px;
+}
+
+.dec_table th, .dec_table td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+    font-size: 9pt;
+    text-align: center;
+}
+
+.dec_table th {
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+
+.table_title {
+    letter-spacing: 2px;
+    font-size: 11pt;
+    padding: 6px !important;
+}
+
+.text_left {
+    text-align: left !important;
+}
+
+.table_footer_label {
+    text-align: right !important;
+    font-weight: bold;
+    background-color: #eee;
+}
+
+.table_footer_value {
+    font-weight: bold;
+    background-color: #eee;
+}
+
+/* Rodapé / Declaração Legal */
+.dec_footer_text {
+    border: 2px solid #000;
+    padding: 8px;
+    font-size: 8.5pt;
+    text-align: justify;
+    line-height: 1.4;
+    min-height: 40mm;
+    display: flex;
+    flex-direction: column;
+}
+
+.dec_termo_titulo {
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+.dec_signatures {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto; /* Empurra a assinatura lá pro final da caixa */
+    padding: 0 10px 10px 10px;
+}
+
+.data_local {
+    font-size: 10pt;
+}
+
+.box_assinatura {
+    text-align: center;
+    width: 40%;
+}
+
+.linha_assinatura {
+    border-bottom: 1px solid #000;
+    margin-bottom: 3px;
+    height: 15px;
+}
+
+/* Comportamento na Impressora */
+@media print {
+    .declaracao_box {
+        width: 100% !important;
+        min-height: 100% !important;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        page-break-after: always;
+    }
+}

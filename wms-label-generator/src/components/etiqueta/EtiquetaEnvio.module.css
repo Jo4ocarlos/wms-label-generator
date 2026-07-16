@@ -1,0 +1,138 @@
+/* =========================================
+   ESTRUTURA GERAL DA ETIQUETA
+   ========================================= */
+.etiqueta {
+    display: flex;
+    flex-direction: column; 
+    width: 100mm;
+    height: 80mm;
+    background: white;
+    padding: 3mm; 
+    box-sizing: border-box; 
+    /* Visualização na tela */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border: 1px solid #ccc;
+    /* Impressão */
+    page-break-after: always; 
+    font-size: 10pt;
+    break-after: page;
+    overflow: hidden; /* Corta se passar do tamanho */
+}
+
+/* =========================================
+   CABEÇALHO
+   ========================================= */
+.header_etiqueta {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    height: 15mm; /* Reduzi de 15mm para 12mm */
+    margin-bottom: 1mm;
+}
+
+.logo_empresa {
+    max-height: 40%; 
+    max-width: 30mm;  
+    object-fit: contain; 
+}
+
+.logo_transport{
+    max-height: 130%; 
+    max-width: 250mm;
+    object-fit: contain;
+}
+
+/* =========================================
+   CONTEÚDO
+   ========================================= */
+.conteudo {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px;
+    gap: 2px;
+}
+
+.conteudo h2 {
+    font-size: 13pt; 
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1.0;
+    margin: 0 0 2mm 0;
+}
+
+.conteudo p {
+    margin: 1px 0;
+    line-height: 1.2;
+}
+
+.obs {
+    font-size: 9pt;
+    font-style: italic;
+    color: #555;
+    margin-top: 2px;
+}
+
+.cep_box {
+    display: flex; 
+    margin: 5px 0px; 
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.cep {
+    font-size: 18px;
+}
+
+.complemento {
+    display: flex;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 20px;
+}
+
+/* =========================================
+   RODAPÉ (Arezzo + ID)
+   ========================================= */
+.footer_etiqueta {
+    display: flex;
+    justify-content: space-between; 
+    align-items: flex-end; 
+    border-top: 1px dashed #999;
+}
+
+.remetente_box p {
+    font-size: 8pt;
+    padding-top: 5px;
+}
+
+.id_numero {
+    font-size: 13pt;
+    font-weight: bolder;
+    color: #000;
+}
+
+/* =========================================
+   COMPORTAMENTO DE IMPRESSÃO (A MÁGICA)
+   ========================================= */
+@media print {
+
+
+    .etiqueta {
+        /* Removemos os enfeites visuais da tela para não gastar tinta nem bugar o tamanho */
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        
+        /* Forçamos o tamanho exato da etiqueta térmica padrão */
+        width: 100mm !important;
+        height: 80mm !important; 
+        
+        /* Avisa a impressora para cortar a fita/pular página após esta div */
+        page-break-after: always !important;
+        break-after: page !important;
+        
+        /* Se o conteúdo for maior que 80mm, ele é escondido em vez de vazar para a próxima etiqueta */
+        overflow: hidden !important;
+    }
+}
