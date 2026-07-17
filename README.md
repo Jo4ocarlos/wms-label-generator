@@ -49,12 +49,16 @@ Para que você possa explorar a arquitetura de validação de dados em tempo rea
 1. Clone o repositório:
    ```bash
    git clone [https://github.com/Jo4ocarlos/wms-label-generator.git](https://github.com/Jo4ocarlos/wms-label-generator.git)
+   ```
 
-  Instale as dependências:
+2. Instale as dependências:
+   ```bash
    npm install
+   ```
 
-  Inicie o servidor de desenvolvimento:
-    npm run dev
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
 
-
-Desenvolvido por João Carlos de Almeida Silva
+*Desenvolvido por João Carlos de Almeida Silva - Conecte-se comigo no [LinkedIn](https://www.linkedin.com/in/jo%C3%A3o-carlos-de-almeida-silva-724579171/)*
