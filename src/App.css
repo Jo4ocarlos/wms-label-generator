@@ -25,48 +25,63 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
 }
-
 /* ========================================================
-   LAYOUT PRINCIPAL E ÁREA DE IMPRESSÃO
+   LAYOUT PRINCIPAL 
 ======================================================== */
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  flex-direction: row; 
+  height: 100vh; 
   width: 100%;
+  overflow: hidden; 
 }
 
-.print-area {
-  flex-grow: 1;
-  padding: 32px;
+/* Container que segura as folhas e a status bar */
+.main-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; 
+  align-items: flex-start; 
+  justify-content: center;
+  gap: 32px;
+  padding: 32px;
+  flex: 1; 
+  min-width: 0; 
+  overflow-y: auto; 
+}
+
+/* Área onde ficam as folhas A4 */
+.print-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column; 
   align-items: center;
   gap: 24px;
-  overflow-y: auto;
-}
-/* ========================================================
-   BARRA DE STATUS (Painel Flutuante à Direita)
-======================================================== */
-.status-bar {
-  position: fixed; 
-  top: 5px;
-  right: 24px;
-  background-color: #ffffff; 
-  border-radius: var(--radius); 
-  padding: 16px;
-  box-shadow: var(--shadow-md); 
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  align-items: center; 
-  width: 350px;
-  gap: 16px; 
+  min-width: 0; /* Continua a proteção contra overflow */
 }
 
-/* Container dos Cards */
+/* ========================================================
+   STATUS BAR (COMPONENTE DA DIREITA NO DESKTOP)
+======================================================== */
+.status-bar {
+  width: 320px; 
+  flex-shrink: 0; /* Impede que a barra seja esmagada */
+  position: sticky;
+  top: 0; /* Gruda no topo ao rolar o main-content */
+  
+  display: flex;
+  flex-direction: column; 
+  align-items: stretch;
+  gap: 1.5rem;
+  background-color: var(--sidebar-bg); 
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
 .status-cards {
   display: flex;
-  gap: 12px; 
+  flex-direction: column; 
+  gap: 1rem;
   width: 100%;
 }
 
@@ -76,11 +91,10 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 12px 16px;
+  padding: 16px;
   border-radius: var(--radius);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  min-width: 130px;
   flex: 1; 
 }
 
@@ -107,17 +121,18 @@ body {
   cursor: help;
   position: relative; 
 }
+
 .card-alerta.ativo .card-value {
   color: #a16207;
 }
 
 /* ========================================================
-   CHECKBOX FORÇAR IMPRESSÃO
+   CHECKBOX FORÇAR IMPRESSÃO E TOOLTIPS
 ======================================================== */
 .checkbox-forcar {
   width: 100%;
-  padding-top: 8px;
-  border-top: 1px solid var(--border-color); /* Uma linha sutil separando os cards do checkbox */
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color); 
 }
 
 .checkbox-forcar label {
@@ -138,22 +153,19 @@ body {
   accent-color: var(--primary-color);
 }
 
-/* ========================================================
-   TOOLTIP DE INCONSISTÊNCIAS
-======================================================== */
 .tooltip-inconsistencias {
   display: none;
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 8px; /* Dá um espacinho do card */
+  margin-top: 8px; 
   background-color: var(--text-main);
   color: white;
   padding: 12px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   z-index: 50;
-  width: 250px; /* Largura fixa para a tooltip */
+  width: 250px; 
 }
 
 .card-alerta.ativo:hover .tooltip-inconsistencias {
@@ -170,7 +182,7 @@ body {
   list-style: none;
   max-height: 150px;
   overflow-y: auto;
-  text-align: left; /* Garante que a lista fique alinhada à esquerda */
+  text-align: left; 
 }
 
 .tooltip-inconsistencias li {
@@ -178,25 +190,103 @@ body {
   padding: 4px 0;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
+
 /* ========================================================
    REGRAS DE IMPRESSÃO
 ======================================================== */
 @media print {
-  .app-layout {
+  .app-layout, .main-content {
     display: block;
-    min-height: auto;
+    height: auto;
+    overflow: visible;
+    padding: 0;
   }
 
   .print-area {
-    padding: 0;
-    gap: 0;
     display: block;
+    gap: 0;
   }
 
   body {
     background-color: #fff;
   }
-  .status-bar{
-    display: none;
+
+  .status-bar {
+    display: none !important;
+  }
+}
+
+/* ========================================================
+   RESPONSIVIDADE NÍVEL SÊNIOR
+======================================================== */
+
+/* 1ª QUEBRA: Telas menores que Ultra-Wide (Laptops e Monitores normais) */
+/* Joga a Status Bar para o topo como um Header, mantendo a Sidebar na esquerda */
+@media (max-width: 1400px) {
+  .main-content {
+    flex-direction: column-reverse; /* Inverte: Traz o último filho (Status Bar) para cima */
+    align-items: center;
+  }
+
+  .status-bar {
+    position: static; 
+    width: 100%;
+    max-width: 800px; /* Alinha com a largura da folha A4 */
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+  }
+
+  .status-cards {
+    flex-direction: row; 
+    width: auto;
+    flex: 1;
+  }
+
+  .checkbox-forcar {
+    width: auto;
+    padding-top: 0;
+    border-top: none;
+    border-left: 1px solid var(--border-color);
+    padding-left: 24px;
+    margin-left: 12px;
+  }
+}
+
+/* 2ª QUEBRA CRÍTICA: Tablets e telas pequenas (O que quebrou no seu print) */
+/* Desarma o layout de colunas da raiz e empilha tudo verticalmente */
+@media (max-width: 1150px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+    overflow-y: auto; /* Devolve o scroll para a página inteira */
+  }
+
+  .main-content {
+    height: auto;
+    overflow-y: visible;
+    padding: 16px;
+  }
+}
+
+/* 3ª QUEBRA: Mobile puro */
+@media (max-width: 768px) {
+  .status-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .status-cards {
+    flex-direction: column;
+  }
+
+  .checkbox-forcar {
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+    padding-left: 0;
+    padding-top: 16px;
+    margin-left: 0;
+    margin-top: 8px;
   }
 }

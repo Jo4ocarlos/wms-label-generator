@@ -1,50 +1,59 @@
+// src/utils/extractProducts.ts
+
+// 1. O CONTRATO (Isso mata o erro de linha vermelha do seu VS Code)
 export interface ProdutoExtraido {
   nome: string;
   quantidade: number;
+  valor?: string | number; // O TypeScript agora sabe que 'valor' existe e é opcional
 }
 
-/**
- * Analisa a linha da planilha e descobre automaticamente qual é o formato 
- * dos dados (Horizontal Padrão ou Horizontal Mapeado) para extrair os itens.
- */
-export const extrairProdutosDaLoja = (linhaDeProdutos: Record<string, string>): ProdutoExtraido[] => {
-  const produtosEncontrados: ProdutoExtraido[] = [];
+// 2. A MÁQUINA DE EXTRAÇÃO
+export const extrairProdutosDaLoja = (linhaDaPlanilha: Record<string, any>): ProdutoExtraido[] => {
+  const produtos: ProdutoExtraido[] = [];
+  
+  // Defesa contra planilhas bagunçadas.
+  // Criamos uma cópia da linha onde TODAS as chaves não têm espaços e são MAIÚSCULAS.
+  // Assim, "produto 4", "PRODUTO 4 " e "PRODUTO4" viram a mesma coisa: "PRODUTO4".
+  const linhaNormalizada: Record<string, any> = {};
+  
+  Object.keys(linhaDaPlanilha).forEach(key => {
+    const cleanKey = key.toUpperCase().replace(/\s+/g, '');
+    linhaNormalizada[cleanKey] = linhaDaPlanilha[key];
+  });
 
-  // 1. TENTA O NOVO FORMATO (Urbana Wear: Colunas "PRODUTO 1", "QTD 1")
-  // Vasculha as colunas buscando qualquer uma que comece com a palavra "PRODUTO"
-  const colunasDeProduto = Object.keys(linhaDeProdutos).filter((coluna) =>
-    coluna.toUpperCase().trim().startsWith("PRODUTO")
-  );
-// Se ele achou pelo menos uma coluna chamada "PRODUTO...", aciona a lógica nova!
-  if (colunasDeProduto.length > 0) {
-    colunasDeProduto.forEach((colunaProduto) => {
-      // Pega o número do produto. Ex: Tira "PRODUTO " e sobra só "1" ou "2"
-      const indice = colunaProduto.toUpperCase().replace("PRODUTO", "").trim();
+  // Assumimos que uma loja não vai receber mais de 40 produtos diferentes em uma única caixa.
+  // Varremos os índices de 1 a 40 procurando combinações.
+  for (let i = 1; i <= 40; i++) {
+    
+    // Busca o nome (Ex: PRODUTO1). Se for o índice 1, aceita apenas "PRODUTO" também.
+    let nomeProduto = linhaNormalizada[`PRODUTO${i}`];
+    if (i === 1 && !nomeProduto) {
+      nomeProduto = linhaNormalizada[`PRODUTO`];
+    }
 
-      const nomeDoProduto = linhaDeProdutos[colunaProduto];
+    // Se achou um nome de produto válido nesta coluna...
+    if (nomeProduto && String(nomeProduto).trim() !== "") {
       
-      // BUSCA ESTRITA: O Produto X só procura na QTD X. Isso mata o bug do "roubo" de quantidade!
-      let quantidadeDoProduto = linhaDeProdutos[`QTD ${indice}`] || linhaDeProdutos[`QTD${indice}`];
-
-      // EXCEÇÃO INTELIGENTE: Se for o Produto 1, e o usuário tiver chamado a coluna só de "QTD" ou "QUANTIDADE", a gente aceita.
-      if (!quantidadeDoProduto && indice === "1") {
-        quantidadeDoProduto = linhaDeProdutos["QTD"] || linhaDeProdutos["QUANTIDADE"];
+      // Busca a Quantidade (Aceita QTD1, QUANTIDADE1. Fallback para QTD no índice 1)
+      let qtdRaw = linhaNormalizada[`QTD${i}`] || linhaNormalizada[`QUANTIDADE${i}`];
+      if (i === 1 && !qtdRaw) {
+        qtdRaw = linhaNormalizada[`QTD`] || linhaNormalizada[`QUANTIDADE`];
+      }
+      
+      // Busca o Valor (Aceita VALOR1, PRECO1. Fallback para VALOR no índice 1)
+      let valorRaw = linhaNormalizada[`VALOR${i}`] || linhaNormalizada[`PRECO${i}`];
+      if (i === 1 && !valorRaw) {
+        valorRaw = linhaNormalizada[`VALOR`] || linhaNormalizada[`PRECO`];
       }
 
-      // Se a célula do produto não estiver vazia e tiver uma quantidade, guarda na caixa!
-      if (nomeDoProduto && nomeDoProduto.trim() !== "" && quantidadeDoProduto) {
-        const qtdConvertida = Number(quantidadeDoProduto);
-        
-        // Garante que é um número matemático válido e maior que zero
-        if (!isNaN(qtdConvertida) && qtdConvertida > 0) {
-          produtosEncontrados.push({
-            nome: nomeDoProduto.trim(),
-            quantidade: qtdConvertida,
-          });
-        }
-      }
-    });
+      // Adiciona ao array formatado
+      produtos.push({
+        nome: String(nomeProduto).trim(),
+        quantidade: parseInt(qtdRaw) || 1, // Se a atendente esquecer a qtd, assume 1
+        valor: valorRaw // Manda o valor bruto para o formatador do componente limpar depois
+      });
+    }
   }
 
-  return produtosEncontrados;
+  return produtos;
 };

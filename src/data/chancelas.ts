@@ -65,7 +65,7 @@ export const remetentes: ListaRemetentes = {
 
 /**
  * TIPO DINÂMICO: RemetentesValidos
- * @description Extrai as chaves do dicionário (Ex: "Arezzo" | "Bsine" | "Graph A").
+ * @description Extrai as chaves do dicionário (Ex: "Alpha Graphics" | "Aura Corporate ).
  * Usado nas Props para garantir que o sistema só aceite remetentes que realmente existem no banco.
  */
 export type RemetentesValidos = keyof typeof remetentes;

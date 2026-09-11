@@ -24,77 +24,67 @@ export const useFetch = (url: string) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   // ==========================================
-  // EFEITO DE BUSCA (Side Effect)
+  // EFEITO DE BUSCA (Side Effect com AbortController)
   // ==========================================
-  
   useEffect(() => {
-    // Cláusula de Guarda (Guard Clause): Se não passar URL, o hook cruza os braços e não faz nada.
     if (!url) return;
-    // ==========================================
-    // CACHE BUSTING (Anti-Cache)
-    // ==========================================
+
+    // 1. Instancia o controlador de aborto nativo do navegador
+    const abortController = new AbortController();
+    
     const timestamp = Date.now();
-    // Se a URL já tiver parâmetros (?), usamos '&'. Se não, usamos '?'.
     const separador = url.includes("?") ? "&" : "?"; 
     const urlSemCache = `${url}${separador}nocache=${timestamp}`;
-    // Função assíncrona interna (boa prática no React para usar async/await dentro de useEffect)
+
     const fetchData = async () => {
-      // 1. Prepara o terreno (Reseta os estados para a nova busca)
       setLoading(true);
       setData(null);
       setError(null);
 
       try {
-        // 2. Faz a ligação para o servidor
-        const response = await fetch(urlSemCache);
+        // 2. Vincula o sinal de aborto à requisição Fetch
+        const response = await fetch(urlSemCache, { signal: abortController.signal });
 
-        // 3. Valida se o servidor respondeu com sucesso (Status 200-299)
         if (!response.ok) {
           throw new Error(`Erro HTTP: ${response.status}`);
         }
 
-        // 4. Recebe o pacote de texto bruto (O CSV inteiro)
         const csv = await response.text();
-        
-        // 5. Passa o texto pela nossa máquina de conversão para transformá-lo em Array de Objetos
         const jsonConvertido = csvToJson(csv);
-
-        // 6. Entrega o dado pronto para o componente Pai
+        
         setData(jsonConvertido);
-        
+        setError(null);
       } catch (error: unknown) {
-        // ==========================================
-        // TRATAMENTO DE ERROS (Catch)
-        // ==========================================
-        // O TypeScript trata o erro como 'unknown' (desconhecido) porque no JavaScript
-        // é possível dar throw em qualquer coisa (números, strings soltas, arrays, null).
-        
+        // 3. Verifica se o erro foi causado por um aborto intencional
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          console.log('Requisição cancelada pelo usuário (Race Condition evitada).');
+          return; // Sai da função silenciosamente, não altera estado
+        }
+
         if (error instanceof Error) {
-          //MÁGICA DO TYPEGUARD (O "Segurança da Balada")
-          // Aqui nós mostramos o RG pro TypeScript e provamos que a variável 'error' 
-          // foi realmente construída pela classe oficial 'Error' do JavaScript.
-          // Com isso provado, o TypeScript libera o acesso seguro à propriedade '.message'.
           setError(`Ops, deu um erro na busca: ${error.message}`);
-          
         } else {
-          // O VELHO OESTE DO JAVASCRIPT
-          // Caiu aqui porque o sistema (ou uma biblioteca de terceiros) deu um 'throw' 
-          // jogando algo que não é um Erro oficial (ex: throw 404, throw "Deu ruim").
           setError('Ocorreu um erro bizarro que não segue o padrão do sistema.');
         }
       } finally {
-        // ==========================================
-        // FINALIZAÇÃO (Executa sempre, dando certo ou errado)
-        // ==========================================
-        // Desliga o ícone de carregamento, liberando a tela para o usuário
-        setLoading(false);
+        // Só desliga o loading se a requisição não foi abortada, para evitar
+        // piscar a tela caso uma nova requisição já esteja em andamento.
+        if (!abortController.signal.aborted) {
+            setLoading(false);
+        }
       }
     };
 
-    // Dispara a função que acabamos de criar
     fetchData();
+
+    // 4. A Função de Limpeza (Cleanup Function)
+    // O React roda isso SEMPRE que a URL mudar antes de disparar o próximo useEffect.
+    // Isso "mata" a requisição anterior, garantindo que ela não polua o estado ao terminar.
+    return () => {
+      abortController.abort();
+    };
     
-  }, [url]); // A array de dependência garante que o useEffect rode de novo se a URL da empresa mudar
+  }, [url]);
 
   return { data, loading, error };
 };

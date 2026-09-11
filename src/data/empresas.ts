@@ -20,6 +20,7 @@ export interface DadosEmpresa {
   url_products: string;
   /** Link visual da planilha no Google Drive para o usuário acessar via botão "Editar Planilha" */
   url_edit: string;
+  remetenteObrigatorio?: string;
 }
 
 /**
@@ -44,6 +45,7 @@ export const companiesData: ListaEmpresas = {
     url_endereco: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiA9lgxwRGm0XXUy8rCgVCIDtBJiMM4r4QkxKEO5rzrG1ZckjjplzJC4ZnFua0b_-lhLY68I6RrNYh/pub?gid=1368390669&single=true&output=csv",
     url_products: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiA9lgxwRGm0XXUy8rCgVCIDtBJiMM4r4QkxKEO5rzrG1ZckjjplzJC4ZnFua0b_-lhLY68I6RrNYh/pub?gid=1813591796&single=true&output=csv",
     url_edit: "https://docs.google.com/spreadsheets/d/1w_B42mbCnbCjQrR03OEOpC1OyNK6K0beNGnL63D6_cE/edit?usp=sharing",
+    remetenteObrigatorio: "Aura Corporate"// Bloqueia esse remetente
   },
 
   "Mercado Fresco": {

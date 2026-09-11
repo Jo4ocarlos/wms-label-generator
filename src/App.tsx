@@ -50,22 +50,34 @@ function App() {
     // Forçar geração de etiquetas de lojas mesmo sem produtos cadastrados
   const [forcarEtiquetasVazias, setForcarEtiquetasVazias] = useState<boolean>(false);
   
+
+ // ==========================================
+  // REGRAS DE NEGÓCIO E EFEITOS
   // ==========================================
-  // 2. REGRAS DE NEGÓCIO E EFEITOS
-  // ==========================================
-  /**
-   * GARANTIA LOGÍSTICA (useEffect)
-   * Monitora a troca de empresas para evitar que uma etiqueta saia com o remetente fiscal errado.
-   * - Se a empresa for Aura Calçados, trava o remetente como Arezzo.
-   * - Se o usuário sair da Aura Calçados para outra, reseta para Alpha Graphics preventivamente.
-   */
   useEffect(() => {
-    if (empresaAtiva === 'Aura Calçados') {
-      setRemementeAtivo('Aura Corporate');
-    } else if (remetenteAtivo === 'Aura Corporate') {
-      setRemementeAtivo('Alpha Graphics');
+    const dadosDaNovaEmpresa = companiesData[empresaAtiva];
+    
+    if (dadosDaNovaEmpresa?.remetenteObrigatorio) {
+      // Regra 1: A nova empresa exige um remetente fiscal travado
+      setRemementeAtivo(dadosDaNovaEmpresa.remetenteObrigatorio as RemetentesValidos);
+    } else {
+      // Regra 2: A nova empresa é livre.
+      // Descobre quem são os remetentes "Vips" (Exclusivos de outras marcas)
+      const remetentesTravados = Object.values(companiesData)
+        .map(emp => emp.remetenteObrigatorio)
+        .filter(Boolean);
+        
+      // Usa a forma funcional do setState para garantir que estamos lendo o valor ATUAL e exato
+      setRemementeAtivo((remetenteAtual) => {
+        // Se o remetente atual na tela for exclusivo de outra empresa, reseta para o genérico.
+        // Se não for, mantém o que o usuário já tinha escolhido.
+        if (remetentesTravados.includes(remetenteAtual)) {
+          return 'Aura Corporate' as RemetentesValidos; // <-- Substitua pelo seu Remetente Padrão (Fallback)
+        }
+        return remetenteAtual;
+      });
     }
-  }, [empresaAtiva, remetenteAtivo]);
+  }, [empresaAtiva]); // A única dependência é a empresa.
 
   // ==========================================
   // 3. DICIONÁRIOS E BUSCA DE DADOS (Fetch)
@@ -79,62 +91,55 @@ function App() {
   const { data: lojasEprodutos } = useFetch(dadosDaEmpresaAtual.url_products);
 
   // ==========================================
-  // 4. TRATAMENTO E CRUZAMENTO DE DADOS
+  // Indexação de Produtos O(M)
+  // Criamos dicionários (Hash Maps) para busca instantânea O(1)
   // ==========================================
+  const { mapProdutosPorId, mapProdutosPorNome } = useMemo(() => {
+    const mapId = new Map<string, any>();
+    const mapNome = new Map<string, any>();
 
-  /**
-   * JUNÇÃO (Merge / Join Inteligente)
-   * Agora processa a lista direto da API (lojas) unificando com produtos.
-   * Ele detecta as lojas sem produtos e respeita o checkbox de forçar impressão.
-   */
+    if (!lojasEprodutos) return { mapProdutosPorId: mapId, mapProdutosPorNome: mapNome };
+
+    lojasEprodutos.forEach(lojaProd => {
+      const idProd = formatarTexto(lojaProd.ID_CONFERENCIA || "");
+      const nomeProd = formatarTexto(lojaProd.NOME_LOJA || lojaProd["NOME DA LOJA"] || lojaProd.LOJA || "");
+
+      if (idProd) mapId.set(idProd, lojaProd);
+      if (nomeProd) mapNome.set(nomeProd, lojaProd);
+    });
+
+    return { mapProdutosPorId: mapId, mapProdutosPorNome: mapNome };
+  }, [lojasEprodutos]);
+
 // 1. Identifica lojas que não possuem produtos (Inconsistências)
   const lojasSemProdutos = useMemo(() => {
-    return lojas?.filter((lojaEndereco) => {
-      // Pega o ID e o Nome separados
+    if (!lojas) return [];
+
+    return lojas.filter((lojaEndereco) => {
       const idEnd = formatarTexto(lojaEndereco.ID_CONFERENCIA || "");
       const nomeEnd = formatarTexto(lojaEndereco.NOME_LOJA || lojaEndereco["NOME DA LOJA"] || lojaEndereco.LOJA || "");
 
-      // Agora verificamos se tem a linha E se tem produtos válidos nela
-      const temProdutoValido = lojasEprodutos?.some((lojaProd) => {
-        const idProd = formatarTexto(lojaProd.ID_CONFERENCIA || "");
-        const nomeProd = formatarTexto(lojaProd.NOME_LOJA || lojaProd["NOME DA LOJA"] || lojaProd.LOJA || "");
+      // Busca instantânea O(1) no Map
+      const linhaProd = mapProdutosPorId.get(idEnd) || mapProdutosPorNome.get(nomeEnd);
 
-        // Dá o "Match" se o ID bater OU se o Nome bater
-        const matchPorId = idEnd !== "" && idProd !== "" && idEnd === idProd;
-        const matchPorNome = nomeEnd !== "" && nomeProd !== "" && nomeEnd === nomeProd;
+      if (linhaProd) {
+        const produtosDestaLinha = extrairProdutosDaLoja(linhaProd);
+        return produtosDestaLinha.length === 0;
+      }
+      return true;
+    });
+  }, [lojas, mapProdutosPorId, mapProdutosPorNome]);
 
-        // Se encontrou a loja na planilha de produtos...
-        if (matchPorId || matchPorNome) {
-          // ...manda a nossa máquina de extração ler a linha!
-          const produtosDestaLinha = extrairProdutosDaLoja(lojaProd);
-          
-          // Só retorna TRUE (tem produto) se a extração achar pelo menos 1 item válido
-          return produtosDestaLinha.length > 0;
-        }
-
-        return false;
-      });
-      
-      // Se não achou a loja OU se achou mas ela estava vazia, joga pro painel de erro!
-      return !temProdutoValido;
-    }) || [];
-  }, [lojas, lojasEprodutos]);
-
-  // 2. Realiza a junção baseada na regra de negócio (Inner Join ou Left Join)
+  // 2. Realiza a junção baseada na regra de negócio (Join O(N))
   const lojasComProdutosEEndereco = useMemo(() => {
-    return lojas?.reduce((acc: LojaUnificada[], lojaEndereco) => {
+    if (!lojas) return [];
+
+    return lojas.reduce((acc: LojaUnificada[], lojaEndereco) => {
       const idEnd = formatarTexto(lojaEndereco.ID_CONFERENCIA || "");
       const nomeEnd = formatarTexto(lojaEndereco.NOME_LOJA || lojaEndereco["NOME DA LOJA"] || lojaEndereco.LOJA || "");
 
-      const linhaDeProdutosDestaLoja = lojasEprodutos?.find((lojaProd) => {
-        const idProd = formatarTexto(lojaProd.ID_CONFERENCIA || "");
-        const nomeProd = formatarTexto(lojaProd.NOME_LOJA || lojaProd["NOME DA LOJA"] || lojaProd.LOJA || "");
-
-        const matchPorId = idEnd !== "" && idProd !== "" && idEnd === idProd;
-        const matchPorNome = nomeEnd !== "" && nomeProd !== "" && nomeEnd === nomeProd;
-
-        return matchPorId || matchPorNome;
-      });
+      // Busca instantânea O(1) no Map
+      const linhaDeProdutosDestaLoja = mapProdutosPorId.get(idEnd) || mapProdutosPorNome.get(nomeEnd);
 
       const produtosDaLoja = linhaDeProdutosDestaLoja 
         ? extrairProdutosDaLoja(linhaDeProdutosDestaLoja) 
@@ -148,8 +153,8 @@ function App() {
       }
 
       return acc;
-    }, []) || [];
-  }, [lojas, lojasEprodutos, forcarEtiquetasVazias]);
+    }, []);
+  }, [lojas, mapProdutosPorId, mapProdutosPorNome, forcarEtiquetasVazias]);
 
   /**
    * EXTRAÇÃO DE UFs ÚNICAS
@@ -268,54 +273,56 @@ function App() {
           listaUfs={listaDeUfsUnicas}// Entregando a lista que geramos usando o Set()
           linkPlanilha={dadosDaEmpresaAtual.url_edit}
         />
-      <main className="print-area">
+      {/* Container Pai que vai jogar um para cada lado */}
+      <main className="main-content">
         
-        {/* --- ÁREA DE IMPRESSÃO DINÂMICA --- */}
-        {/* O React vai mapear e desenhar o componente de acordo com o modelo selecionado no Painel */}
-        {etiquetaAtiva === "Etiqueta Envio" && lojasFiltradasPorBusca &&
-          lojasFiltradasPorBusca.map((loja, index) => (
-            <EtiquetaEnvio
-              key={loja.endereco.ID_CONFERENCIA || index}
-              dadosDaEmpresa={dadosDaEmpresaAtual}
-              loja={loja.endereco}
-              remetente={dadosRemetenteAtual}
-              nomeDaEmpresa={empresaAtiva}
-            />
-          ))
-        }
-        {etiquetaAtiva === "Etiqueta Simples" && lojasFiltradasPorBusca &&
-          lojasFiltradasPorBusca.map((loja, index) => (
-            <EtiquetaSimples
-              key={loja.endereco.ID_CONFERENCIA || index}
-              dadosDaEmpresa={dadosDaEmpresaAtual}
-              produtos={loja.produtos}
-              nomeDaEmpresa={empresaAtiva}
-            />
-          ))
-        }
-        {etiquetaAtiva === "Folha de Conferência" && lojasFiltradasPorBusca &&
-          lojasFiltradasPorBusca.map((loja, index) => (
-            <FolhaDeConferencia
-              key={loja.endereco.ID_CONFERENCIA || index}
-              loja={loja.endereco}
-              produtos={loja.produtos}
-              dadosDaEmpresa={dadosDaEmpresaAtual}
-            />
-          ))
-        }
-        {etiquetaAtiva === "Declaração de Conteúdo" && lojasFiltradasPorBusca &&
-          lojasFiltradasPorBusca.map((loja, index) => (
-            <DeclaracaoConteudo
-              key={loja.endereco.ID_CONFERENCIA || index}
-              loja={loja.endereco}
-              produtos={loja.produtos}
-              remetente={dadosRemetenteAtual}
-            />
-          ))
-        }
-      </main>
-       <div className="status-bar no-print">
-          {/* === BARRA DE STATUS DA OPERAÇÃO (Não sai na impressão) === */}
+        {/* FILHO 1: ÁREA DE IMPRESSÃO DINÂMICA (ESQUERDA) */}
+        <div className="print-area">
+          {etiquetaAtiva === "Etiqueta Envio" && lojasFiltradasPorBusca &&
+            lojasFiltradasPorBusca.map((loja, index) => (
+              <EtiquetaEnvio
+                key={loja.endereco.ID_CONFERENCIA || index}
+                dadosDaEmpresa={dadosDaEmpresaAtual}
+                loja={loja.endereco}
+                remetente={dadosRemetenteAtual}
+                nomeDaEmpresa={empresaAtiva}
+              />
+            ))
+          }
+          {etiquetaAtiva === "Etiqueta Simples" && lojasFiltradasPorBusca &&
+            lojasFiltradasPorBusca.map((loja, index) => (
+              <EtiquetaSimples
+                key={loja.endereco.ID_CONFERENCIA || index}
+                dadosDaEmpresa={dadosDaEmpresaAtual}
+                produtos={loja.produtos}
+                nomeDaEmpresa={empresaAtiva}
+              />
+            ))
+          }
+          {etiquetaAtiva === "Folha de Conferência" && lojasFiltradasPorBusca &&
+            lojasFiltradasPorBusca.map((loja, index) => (
+              <FolhaDeConferencia
+                key={loja.endereco.ID_CONFERENCIA || index}
+                loja={loja.endereco}
+                produtos={loja.produtos}
+                dadosDaEmpresa={dadosDaEmpresaAtual}
+              />
+            ))
+          }
+          {etiquetaAtiva === "Declaração de Conteúdo" && lojasFiltradasPorBusca &&
+            lojasFiltradasPorBusca.map((loja, index) => (
+              <DeclaracaoConteudo
+                key={loja.endereco.ID_CONFERENCIA || index}
+                loja={loja.endereco}
+                produtos={loja.produtos}
+                remetente={dadosRemetenteAtual}
+              />
+            ))
+          }
+        </div>
+
+        {/* FILHO 2: BARRA DE STATUS (DIREITA) */}
+        <aside className="status-bar no-print">
           <div className="status-cards">
             <div className="card-sucesso">
               <span className="card-label">📦 Lojas Prontas</span>
@@ -351,7 +358,10 @@ function App() {
               Gerar etiquetas sem produtos
             </label>
           </div>
-        </div>
+        </aside>
+
+      </main>
+       
     </div>
   );
 }

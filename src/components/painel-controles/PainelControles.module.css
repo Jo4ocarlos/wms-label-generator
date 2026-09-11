@@ -1,20 +1,15 @@
 /* ========================================================
    ESTILOS ESPECÍFICOS DO PAINEL DE CONTROLES
 ======================================================== */
+
 .sidebarControles {
   width: 320px;
-  min-width: 320px;
+  flex-shrink: 0; /* Impede de amassar no desktop */
   background-color: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  overflow-y: auto;
   padding: 24px;
 }
+
 
 /* Esconde o painel na hora da impressão */
 @media print {
@@ -132,4 +127,13 @@
 .btnSecondary:hover {
   background-color: #f9f9fb;
   border-color: #d1d5db;
+}
+@media (max-width: 1150px) {
+  .sidebarControles {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    position: static;
+    height: auto;
+  }
 }

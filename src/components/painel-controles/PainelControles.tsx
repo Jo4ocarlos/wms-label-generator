@@ -1,7 +1,7 @@
 import styles from './PainelControles.module.css';
 import logoSistema from "../../assets//logos-etiquetas/logoEmpresa.png"
 import { type ChangeEvent } from "react";
-
+import { companiesData } from '../../data/empresas';
 // === IMPORTAÇÕES DE TIPOS DINAMICOS ===
 import { type EmpresaValida } from '../../data/empresas';
 import { type ModelosValidos } from "../../data/etiquetasModelos";
@@ -144,29 +144,38 @@ const PainelControles = ({
         {(etiquetaAtiva === "Declaração de Conteúdo" || etiquetaAtiva === "Etiqueta Envio") && (
           <div className={styles.inputGroup}>
             <label>Remetente Fiscal</label>
-            {empresaAtiva === "Aura Calçados" ? (
-              <select className={styles.modernSelect} value={remetenteAtivo} onChange={handleRemetenteChange} disabled>
-                {listaRemetentes
-                  .filter((nomeRemetente) => nomeRemetente === "Aura Corporate")
-                  .map((nomeRemetente) => (
-                    <option key={nomeRemetente} value={nomeRemetente}>
-                      {nomeRemetente}
-                    </option>
-                  ))
-                }
-              </select>
-            ) : (
-              <select className={styles.modernSelect} value={remetenteAtivo} onChange={handleRemetenteChange}>
-                {listaRemetentes
-                  .filter((nomeRemetente) => nomeRemetente !== "Aura Corporate")
-                  .map((nomeRemetente) => (
-                    <option key={nomeRemetente} value={nomeRemetente}>
-                      {nomeRemetente}
-                    </option>
-                  ))
-                }
-              </select>
-            )}
+            
+            <select 
+              className={styles.modernSelect} 
+              value={remetenteAtivo} 
+              onChange={handleRemetenteChange} 
+              disabled={!!companiesData[empresaAtiva]?.remetenteObrigatorio}
+            >
+              {listaRemetentes
+                .filter((nomeRemetente) => {
+                  const remetenteTravado = companiesData[empresaAtiva]?.remetenteObrigatorio;
+                  
+                  // Regra 1: Se a empresa atual tem trava, mostra SÓ o remetente dela.
+                  if (remetenteTravado) {
+                    return nomeRemetente === remetenteTravado;
+                  }
+
+                  // Regra 2: A empresa é livre.
+                  // Lê o banco de dados dinamicamente para achar todos os remetentes "VIPs"
+                  const remetentesExclusivos = Object.values(companiesData)
+                    .map((emp) => emp.remetenteObrigatorio)
+                    .filter(Boolean); // Tira os nulos e indefinidos
+                  
+                  // Retorna apenas os remetentes que NÃO estão na lista de exclusivos
+                  return !remetentesExclusivos.includes(nomeRemetente); 
+                })
+                .map((nomeRemetente) => (
+                  <option key={nomeRemetente} value={nomeRemetente}>
+                    {nomeRemetente}
+                  </option>
+                ))
+              }
+            </select>
           </div>
         )}
 
