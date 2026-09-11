@@ -7,7 +7,7 @@
 ![Google Sheets API](https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white)
 
 ## 🎬 Demonstração Visual Do Sistema
-![Demonstração do Frontend](.github/assets/)
+![Demonstração do Frontend](.github/assets/frontend.gif)
 
 ## O Problema
 No ambiente logístico de e-commerces e varejo, operações de *picking e packing* (separação e embalagem) frequentemente dependem de planilhas complexas, descentralizadas e sujeitas a erros humanos na digitação. Operadores perdem tempo cruzando dados de lojas com listas horizontais gigantescas de produtos para gerar etiquetas de envio e folhas de conferência.
